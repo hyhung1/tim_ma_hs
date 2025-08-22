@@ -1,0 +1,283 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <style>
+    body {
+      width: 400px;
+      min-height: 300px;
+      margin: 0;
+      padding: 16px;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: #f8f9fa;
+    }
+
+    .header {
+      text-align: center;
+      margin-bottom: 20px;
+    }
+
+    .header h1 {
+      margin: 0;
+      font-size: 18px;
+      font-weight: bold;
+      color: #333;
+    }
+
+    .server-config {
+      background: #f0f8ff;
+      border: 1px solid #ddd;
+      border-radius: 6px;
+      padding: 12px;
+      margin-bottom: 16px;
+    }
+
+    .config-row {
+      display: flex;
+      gap: 8px;
+      align-items: center;
+      margin-bottom: 8px;
+    }
+
+    .config-row label {
+      font-size: 12px;
+      font-weight: 500;
+      color: #555;
+      min-width: 70px;
+    }
+
+    .server-input {
+      flex: 1;
+      padding: 6px 8px;
+      border: 1px solid #ddd;
+      border-radius: 4px;
+      font-size: 12px;
+      outline: none;
+    }
+
+    .server-input:focus {
+      border-color: #2196F3;
+    }
+
+    .test-button {
+      padding: 6px 12px;
+      background-color: #2196F3;
+      color: white;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 12px;
+      transition: background-color 0.3s ease;
+    }
+
+    .test-button:hover:not(:disabled) {
+      background-color: #1976D2;
+    }
+
+    .test-button:disabled {
+      background-color: #cccccc;
+      cursor: not-allowed;
+    }
+
+    .connection-status {
+      font-size: 11px;
+      padding: 4px 0;
+      text-align: center;
+    }
+
+    .connection-status.success {
+      color: #4CAF50;
+    }
+
+    .connection-status.error {
+      color: #f44336;
+    }
+
+    .connection-status.testing {
+      color: #ff9800;
+    }
+
+    .search-container {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 16px;
+    }
+
+    .search-input {
+      flex: 1;
+      padding: 10px 12px;
+      border: 2px solid #ddd;
+      border-radius: 6px;
+      font-size: 14px;
+      outline: none;
+      transition: border-color 0.3s ease;
+    }
+
+    .search-input:focus {
+      border-color: #4CAF50;
+    }
+
+    .search-button {
+      padding: 10px 16px;
+      background-color: #4CAF50;
+      color: white;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 14px;
+      font-weight: 500;
+      transition: background-color 0.3s ease;
+    }
+
+    .search-button:hover:not(:disabled) {
+      background-color: #45a049;
+    }
+
+    .search-button:disabled {
+      background-color: #cccccc;
+      cursor: not-allowed;
+    }
+
+    .loading {
+      text-align: center;
+      padding: 20px;
+      color: #666;
+    }
+
+    .error {
+      background-color: #ffebee;
+      color: #c62828;
+      padding: 12px;
+      border-radius: 6px;
+      margin-bottom: 16px;
+      font-size: 14px;
+      border-left: 4px solid #c62828;
+    }
+
+    .result {
+      background: white;
+      border-radius: 8px;
+      padding: 16px;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+      margin-top: 16px;
+    }
+
+    .result-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 12px;
+      padding-bottom: 8px;
+      border-bottom: 1px solid #eee;
+    }
+
+    .hs-code {
+      font-family: 'Courier New', monospace;
+      font-weight: bold;
+      color: #2196F3;
+      font-size: 16px;
+    }
+
+    .copy-button {
+      background: #f5f5f5;
+      border: 1px solid #ddd;
+      border-radius: 4px;
+      padding: 4px 8px;
+      cursor: pointer;
+      font-size: 12px;
+      color: #666;
+      transition: all 0.3s ease;
+    }
+
+    .copy-button:hover {
+      background: #e9e9e9;
+      color: #333;
+    }
+
+    .content {
+      line-height: 1.6;
+      color: #333;
+      white-space: pre-wrap;
+      word-wrap: break-word;
+      font-size: 14px;
+    }
+
+    .no-result {
+      text-align: center;
+      padding: 40px 20px;
+      color: #666;
+    }
+
+    .footer {
+      text-align: center;
+      margin-top: 16px;
+      font-size: 12px;
+      color: #999;
+    }
+
+    .footer a {
+      color: #2196F3;
+      text-decoration: none;
+    }
+
+    .footer a:hover {
+      text-decoration: underline;
+    }
+  </style>
+</head>
+<body>
+  <div class="header">
+    <h1>HS Code Lookup</h1>
+  </div>
+
+  <div class="server-config">
+    <div class="config-row">
+      <label for="serverUrl">Server URL:</label>
+      <input 
+        type="text" 
+        id="serverUrl" 
+        class="server-input" 
+        placeholder="http://192.168.1.100:1000"
+        value="http://172.16.16.149:1000"
+      >
+      <button id="testConnection" class="test-button">Test</button>
+    </div>
+    <div id="connectionStatus" class="connection-status"></div>
+  </div>
+
+  <div class="search-container">
+    <input 
+      type="text" 
+      id="hsCodeInput" 
+      class="search-input" 
+      placeholder="Enter HS code (e.g., 8471.30.90)"
+      maxlength="20"
+    >
+    <button id="searchButton" class="search-button">Search</button>
+  </div>
+
+  <div id="loading" class="loading" style="display: none;">
+    Searching...
+  </div>
+
+  <div id="error" class="error" style="display: none;"></div>
+
+  <div id="result" class="result" style="display: none;">
+    <div class="result-header">
+      <span id="resultHsCode" class="hs-code"></span>
+      <button id="copyButton" class="copy-button" title="Copy to clipboard">Copy</button>
+    </div>
+    <div id="resultContent" class="content"></div>
+  </div>
+
+  <div id="noResult" class="no-result" style="display: none;">
+    <p>Enter an HS code above to search</p>
+  </div>
+
+  <div class="footer">
+    <a href="#" id="openWebApp">Open Full Web App</a>
+  </div>
+
+  <script src="popup.js"></script>
+</body>
+</html>
