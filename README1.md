@@ -1,7 +1,7 @@
 # 🏢 VIVN HRM (StaffSphere)
 
 <p align="center">
-  <img src="frontend/public/logo.png" alt="StaffSphere Logo" width="120" height="120">
+  <img src="logo.png" alt="StaffSphere Logo" width="120" height="120">
 </p>
 
 <p align="center">
