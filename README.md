@@ -1,198 +1,295 @@
-# Đánh giá workload của nhân viên
-_Exported on 11/18/2025 at 10:41:44 GMT+7 from Cursor (2.0.77)_
+# Hướng dẫn Đánh giá Workload Nhân viên - Dashboard
+_Tài liệu ngày 27/11/2025_
 
 ---
 
-**User**
+## **Tổng quan**
 
-hãy xem qua phần Project Management, chú ý phần dự án trong phần Gantt và Team, tui muốn biết xem workload của 1 nhân viên như thế nào, làm thế nào để đánh giá xem người đó có đang bị quá tải ko
-
----
-
-**Cursor**
-
-Tôi sẽ xem qua các file Project Management để hiểu cách theo dõi workload của nhân viên. Hãy để tôi đọc các file dữ liệu liên quan.
-
-Tôi đã phân tích các file Project Management. Để đánh giá workload của nhân viên, tôi sẽ phân tích dựa trên các yếu tố sau:
-
-## **Cách đánh giá Workload hiện tại**
-
-Dựa vào dữ liệu, có thể đánh giá workload qua:
-
-### **1. Số lượng Task đang chạy đồng thời (Overlapping Tasks)**
-- Đếm số task có khoảng thời gian trùng lặp
-- Đây là chỉ số quan trọng nhất để phát hiện quá tải
-
-### **2. Độ phức tạp Task (Complexity)**
-- **High**: Tương đương 3 điểm
-- **Medium**: Tương đương 2 điểm  
-- **Low**: Tương đương 1 điểm
-
-### **3. Trạng thái Task**
-- Chỉ tính các task `in_progress` và task chưa hoàn thành trong khoảng thời gian đánh giá
+Workload Dashboard trong phần **Project Management** cung cấp cái nhìn tổng quan về khối lượng công việc của từng nhân viên dựa trên các task được giao. Hệ thống phân tích và đánh giá workload dựa trên **độ phức tạp của task (Complexity)** và tự động phát hiện các dấu hiệu quá tải.
 
 ---
 
-## **Phân tích cụ thể - John Doe (ĐANG BỊ QUÁ TẢI)**
+## **📊 Cách tính điểm Workload (Workload Score)**
 
-**Khoảng thời gian 01-11 đến 20-11-2025:**
+### **1. Điểm phức tạp Task (Complexity Points)**
 
-### Tasks đang chạy:
+Mỗi task được gán điểm dựa trên độ phức tạp:
+
+| Độ phức tạp | Điểm mặc định | Màu sắc |
+|-------------|---------------|---------|
+| 🔴 **High** | 6 điểm | Fuchsia/Đỏ tím |
+| 🟠 **Medium** | 3 điểm | Indigo/Xanh tím |
+| 🟢 **Low** | 1 điểm | Teal/Xanh lá |
+
+> **Lưu ý:** Điểm phức tạp có thể tùy chỉnh trong Dashboard bằng nút "✏️ Edit" tại phần **Complexity Points**.
+
+### **2. Công thức tính Workload Score**
+
 ```
-PROJECT 1 (Idemitsu):
-✓ Task 2: Meteo (01-11→20-11) - HIGH - in_progress [70%]
-✓ Task 3: Tel (01-11→15-11) - MEDIUM - in_progress [40%]
-✓ Task 8: CCTV Rev1 (01-11→18-11) - HIGH - in_progress [0%]
-✓ Task 9: Meteo Rev1 (01-11→20-11) - HIGH - in_progress [0%]
-✓ Task 10: Tel Rev1 (01-11→15-11) - MEDIUM - in_progress [0%]
-✓ Task 12: VHF Rev1 (01-11→12-11) - MEDIUM - in_progress [0%]
-
-PROJECT 2 (PTSC - 07-11→19-11):
-✓ Task 4: Cabinet (07-11→13-11) - LOW - in_progress [0%]
+Workload Score = Σ (Complexity Points của tất cả task đang active)
 ```
 
-**Điểm workload:**
-- 3 tasks HIGH complexity = 9 điểm
-- 3 tasks MEDIUM complexity = 6 điểm
-- 1 task LOW complexity = 1 điểm
-- **TỔNG: 16 điểm trong cùng 1 khoảng thời gian**
-
-**Dấu hiệu quá tải:**
-- ✅ Có **7 tasks chạy đồng thời** (1-20 Nov)
-- ✅ Có **3 tasks HIGH complexity** cùng lúc
-- ✅ Nhiều task Rev1 có progress = 0% (chưa bắt đầu)
-- ✅ Task progress thấp (40%, 0%) cho thấy không đủ thời gian
+Ví dụ:
+- 2 task HIGH = 2 × 6 = 12 điểm
+- 3 task MEDIUM = 3 × 3 = 9 điểm  
+- 1 task LOW = 1 × 1 = 1 điểm
+- **Tổng: 22 điểm**
 
 ---
 
-## **Phân tích cụ thể - Mike Brown (Mức độ hợp lý)**
+## **🚨 Tiêu chí Đánh giá Trạng thái Workload**
 
-**Khoảng thời gian 01-11 đến 20-11-2025:**
+### **Ngưỡng trạng thái (Status Thresholds)**
 
-### Tasks đang chạy:
-```
-PROJECT 1 (Idemitsu):
-✓ Task 4: UHF (01-11→12-11) - MEDIUM - in_progress [80%]
-✓ Task 11: UHF Rev1 (01-11→12-11) - MEDIUM - in_progress [0%]
+| Trạng thái | Điều kiện | Biểu tượng | Ý nghĩa |
+|------------|-----------|------------|---------|
+| ✅ **Safe** | < 18 điểm | Xanh lá | Workload ổn định, có thể nhận thêm task |
+| ⚠️ **Warning** | 18-24 điểm | Vàng | Cần theo dõi, sắp đạt ngưỡng quá tải |
+| 🚨 **Overloaded** | > 24 điểm | Đỏ | Quá tải, cần phân bổ lại công việc |
 
-PROJECT 2 (PTSC - 07-11→19-11):
-✓ Task 3: Crane (07-11→13-11) - MEDIUM - in_progress [0%]
-```
-
-**Điểm workload:**
-- 0 tasks HIGH complexity = 0 điểm
-- 3 tasks MEDIUM complexity = 6 điểm
-- **TỔNG: 6 điểm trong cùng 1 khoảng thời gian**
-
-**Đánh giá:** Mức độ hợp lý, chưa bị quá tải
+> **Lưu ý:** Ngưỡng này có thể tùy chỉnh trong Dashboard bằng nút "✏️ Edit" tại phần **Status Thresholds**.
 
 ---
 
-## **🚨 Tiêu chí đánh giá QUẢTẢI**
+## **⚠️ Hệ thống Cảnh báo (Alerts)**
 
-### **Mức độ Workload theo điểm:**
+Dashboard tự động phát hiện và cảnh báo các tình huống sau:
+
+### **1. Số task đồng thời quá nhiều**
 ```
-✅ < 6 điểm: An toàn
-⚠️  6-10 điểm: Cảnh báo (cần theo dõi)
-🚨 > 10 điểm: Quá tải (cần phân bổ lại)
+🔴 Trigger: > 5 tasks running simultaneously
 ```
+- Khi nhân viên có hơn 5 task đang chạy cùng lúc
+- Dấu hiệu của việc phân bổ không đều
 
-### **Các dấu hiệu cụ thể:**
+### **2. Nhiều task độ phức tạp cao**
+```
+🔴 Trigger: ≥ 2 HIGH complexity tasks at once
+```
+- Khi có từ 2 task HIGH complexity trở lên chạy song song
+- Rủi ro cao về quality và deadline
 
-1. **Số tasks đồng thời:**
-   - > 5 tasks cùng lúc → Quá tải
-   - 3-5 tasks → Cảnh báo
-   - < 3 tasks → An toàn
+### **3. Overlap giữa nhiều dự án**
+```
+🔴 Trigger: Cross-project overlaps > 0
+```
+- Khi task từ các project khác nhau có thời gian trùng lặp
+- Context switching gây giảm hiệu suất
 
-2. **Có nhiều task HIGH complexity trùng thời gian:**
-   - ≥ 2 tasks HIGH cùng lúc → Quá tải
+### **4. Làm việc trên quá nhiều dự án**
+```
+🔴 Trigger: Working on > 2 different projects
+```
+- Khi nhân viên tham gia hơn 2 project khác nhau
+- Phân tán focus và resource
 
-3. **Progress thấp hoặc không tiến triển:**
-   - Nhiều task progress = 0% sau thời gian dài → Không đủ capacity
-
-4. **Task đã quá hạn nhưng vẫn in_progress:**
-   - End date < ngày hiện tại (18-11) nhưng chưa done
+### **5. Task không tiến triển**
+```
+🔴 Trigger: > 2 tasks with 0% progress
+```
+- Khi có hơn 2 task có progress = 0%
+- Dấu hiệu của việc không đủ capacity
 
 ---
 
-## **💡 Giải pháp để quản lý Workload tốt hơn**
+## **📋 Thông tin hiển thị cho mỗi Nhân viên**
 
-### **Thiếu trong hệ thống hiện tại:**
+Dashboard hiển thị card cho mỗi nhân viên với các thông tin:
 
-1. **Không có tracking số giờ làm việc:**
-   - Nên thêm: `estimated_hours` và `actual_hours` cho mỗi task
+### **Header**
+- **Tên nhân viên** và avatar
+- **Số task** đang được giao
+- **Số project** đang tham gia
+- **Status badge** (Safe/Warning/Overloaded)
 
-2. **Không có capacity planning:**
-   - Nên thêm: `available_hours_per_week` cho team member
+### **Workload Score Bar**
+- Thanh progress bar trực quan
+- Hiển thị số điểm workload
+- Màu sắc thay đổi theo trạng thái
 
-3. **Không có workload score tự động:**
-   - Nên tính toán tự động workload score theo công thức:
-   ```
-   Workload Score = Σ (complexity_weight × remaining_hours / total_days)
-   ```
+### **Task Complexity Breakdown**
+- Số lượng task theo từng mức độ phức tạp
+- High (Fuchsia), Medium (Indigo), Low (Teal)
 
-4. **Không có cảnh báo overlap:**
-   - Nên có cảnh báo khi assign task mới cho người đã có nhiều task trùng thời gian
+### **Projects**
+- Danh sách project nhân viên đang tham gia
+- Số task trong mỗi project
 
-### **Đề xuất cải thiện dữ liệu:**
+### **Alerts**
+- Các cảnh báo tự động khi phát hiện vấn đề
 
+---
+
+## **📈 Phân tích Ví dụ Thực tế**
+
+### **Ví dụ 1: John Doe (ĐANG QUÁ TẢI)**
+
+**Khoảng thời gian 01-11 đến 24-11-2025:**
+
+```plaintext
+PROJECT: Idemitsu - Telecomunication maintenance (Rev1)
+✓ Task: CCTV (01-11→18-11) - HIGH - in_progress [0%]
+✓ Task: Meteo (01-11→20-11) - HIGH - in_progress [0%]
+✓ Task: Tel (01-11→15-11) - MEDIUM - in_progress [0%]
+✓ Task: VHF (01-11→12-11) - MEDIUM - in_progress [0%]
+
+PROJECT: PTSC - SCADA and Telecom (Rev0)
+✓ Task: Meteo (07-11→19-11) - HIGH - done [100%]
+✓ Task: Cabinet (07-11→13-11) - LOW - in_progress [0%]
+```
+
+**Tính điểm Workload:**
+| Độ phức tạp | Số lượng | Điểm |
+|-------------|----------|------|
+| HIGH | 3 tasks | 3 × 6 = 18 |
+| MEDIUM | 2 tasks | 2 × 3 = 6 |
+| LOW | 1 task | 1 × 1 = 1 |
+| **TỔNG** | **6 tasks** | **25 điểm** |
+
+**Đánh giá:**
+- 🚨 **Status: OVERLOADED** (> 24 điểm)
+- ⚠️ Alert: 3 HIGH complexity tasks at once
+- ⚠️ Alert: Working on 2 different projects
+- ⚠️ Alert: Cross-project overlaps detected
+- ⚠️ Alert: Multiple tasks with 0% progress
+
+---
+
+### **Ví dụ 2: Mike Brown (MỨC ĐỘ HỢP LÝ)**
+
+**Khoảng thời gian 01-11 đến 24-11-2025:**
+
+```plaintext
+PROJECT: Idemitsu - Telecomunication maintenance (Rev1)
+✓ Task: UHF (01-11→12-11) - MEDIUM - in_progress [0%]
+
+PROJECT: PTSC - SCADA and Telecom (Rev0)
+✓ Task: CCTV (07-11→18-11) - HIGH - done [100%]
+✓ Task: Crane (07-11→13-11) - MEDIUM - in_progress [0%]
+```
+
+**Tính điểm Workload:**
+| Độ phức tạp | Số lượng | Điểm |
+|-------------|----------|------|
+| HIGH | 1 task | 1 × 6 = 6 |
+| MEDIUM | 2 tasks | 2 × 3 = 6 |
+| **TỔNG** | **3 tasks** | **12 điểm** |
+
+**Đánh giá:**
+- ✅ **Status: SAFE** (< 18 điểm)
+- Số task hợp lý, có thể nhận thêm công việc
+
+---
+
+## **💡 Các tính năng nâng cao**
+
+### **1. Filter theo Status**
+- Lọc hiển thị nhân viên theo trạng thái: All, Safe, Warning, Overloaded
+- Giúp nhanh chóng identify các nhân viên cần hỗ trợ
+
+### **2. Sort theo tiêu chí**
+- **Workload Score**: Sắp xếp theo điểm workload (cao → thấp)
+- **Name**: Sắp xếp theo tên
+- **Task Count**: Sắp xếp theo số task
+
+### **3. Tùy chỉnh Complexity Points**
 ```json
 {
-  "assignee": "John Doe",
-  "capacity_per_week": 40,  // hours
-  "current_workload_score": 16,
-  "status": "overloaded",
-  "alerts": [
-    "7 overlapping tasks",
-    "3 high complexity tasks in parallel"
-  ]
+  "high": 6,    // Có thể điều chỉnh
+  "medium": 3,  // Có thể điều chỉnh
+  "low": 1      // Có thể điều chỉnh
 }
 ```
 
-Bạn có muốn tôi tạo một đoạn code để tính toán workload score tự động không?
-
-```plaintext
-PROJECT 1 (Idemitsu):
-✓ Task 2: Meteo (01-11→20-11) - HIGH - in_progress [70%]
-✓ Task 3: Tel (01-11→15-11) - MEDIUM - in_progress [40%]
-✓ Task 8: CCTV Rev1 (01-11→18-11) - HIGH - in_progress [0%]
-✓ Task 9: Meteo Rev1 (01-11→20-11) - HIGH - in_progress [0%]
-✓ Task 10: Tel Rev1 (01-11→15-11) - MEDIUM - in_progress [0%]
-✓ Task 12: VHF Rev1 (01-11→12-11) - MEDIUM - in_progress [0%]
-
-PROJECT 2 (PTSC - 07-11→19-11):
-✓ Task 4: Cabinet (07-11→13-11) - LOW - in_progress [0%]
-```
-
-```plaintext
-PROJECT 1 (Idemitsu):
-✓ Task 4: UHF (01-11→12-11) - MEDIUM - in_progress [80%]
-✓ Task 11: UHF Rev1 (01-11→12-11) - MEDIUM - in_progress [0%]
-
-PROJECT 2 (PTSC - 07-11→19-11):
-✓ Task 3: Crane (07-11→13-11) - MEDIUM - in_progress [0%]
-```
-
-```plaintext
-✅ < 6 điểm: An toàn
-⚠️  6-10 điểm: Cảnh báo (cần theo dõi)
-🚨 > 10 điểm: Quá tải (cần phân bổ lại)
-```
-
-```plaintext
-   Workload Score = Σ (complexity_weight × remaining_hours / total_days)
-```
-
+### **4. Tùy chỉnh Status Thresholds**
 ```json
 {
-  "assignee": "John Doe",
-  "capacity_per_week": 40,  // hours
-  "current_workload_score": 16,
-  "status": "overloaded",
-  "alerts": [
-    "7 overlapping tasks",
-    "3 high complexity tasks in parallel"
-  ]
+  "SAFE_MAX": 18,      // Có thể điều chỉnh
+  "WARNING_MAX": 24    // Có thể điều chỉnh
 }
 ```
+
+---
+
+## **🔄 Cách Dashboard lọc Task**
+
+Dashboard chỉ tính workload cho các task thuộc:
+
+1. **Project có status "On-going"** - Không tính project đã Done
+2. **Revision mới nhất** - Nếu project có nhiều revision, chỉ lấy revision cao nhất
+3. **Tất cả task của project** - Bao gồm cả task done và in_progress
+
+Điều này đảm bảo workload phản ánh đúng công việc thực tế đang diễn ra.
+
+---
+
+## **📊 Summary Cards**
+
+Dashboard hiển thị 4 summary cards ở đầu trang:
+
+| Card | Nội dung |
+|------|----------|
+| **Total Members** | Tổng số nhân viên có task |
+| **✅ Safe** | Số nhân viên an toàn |
+| **⚠️ Warning** | Số nhân viên cần theo dõi |
+| **🚨 Overloaded** | Số nhân viên quá tải |
+
+---
+
+## **🎯 Đề xuất Quản lý Workload**
+
+### **Khi nhân viên ở trạng thái SAFE:**
+- ✅ Có thể assign thêm task mới
+- ✅ Ưu tiên assign task HIGH complexity nếu cần
+
+### **Khi nhân viên ở trạng thái WARNING:**
+- ⚠️ Cân nhắc kỹ trước khi assign thêm task
+- ⚠️ Ưu tiên task LOW hoặc MEDIUM complexity
+- ⚠️ Theo dõi progress thường xuyên
+
+### **Khi nhân viên ở trạng thái OVERLOADED:**
+- 🚨 Không nên assign thêm task mới
+- 🚨 Xem xét redistribute task sang người khác
+- 🚨 Review lại priority của các task hiện tại
+- 🚨 Thảo luận với nhân viên về khó khăn
+
+---
+
+## **📝 Lưu ý quan trọng**
+
+1. **Workload Score chỉ dựa trên Complexity** - Không tính overlapping score vào tổng điểm
+2. **Overlapping được tracking riêng** - Dùng để hiển thị alerts, không ảnh hưởng score
+3. **Cài đặt được lưu trong localStorage** - Complexity points và thresholds được lưu trữ local
+4. **Data refresh tự động** - Dashboard tự động refresh data khi chuyển tab
+
+---
+
+## **📚 Tham khảo Code**
+
+Component chính: `frontend/src/components/WorkloadDashboard.tsx`
+
+Interface MemberWorkload:
+```typescript
+interface MemberWorkload {
+  name: string;
+  totalTasks: number;
+  activeTasks: number;
+  overlappingTasks: number;
+  multiProjectOverlap: number;
+  projectCount: number;
+  complexityScore: number;
+  overlappingScore: number;
+  totalScore: number;
+  status: 'safe' | 'warning' | 'overloaded';
+  alerts: string[];
+  tasksByProject: Map<string, number>;
+  highComplexityCount: number;
+  mediumComplexityCount: number;
+  lowComplexityCount: number;
+}
+```
+
+---
+
+*Tài liệu này giải thích chi tiết cách Workload Dashboard đánh giá và theo dõi khối lượng công việc của nhân viên trong hệ thống VIVN_HRM.*
 
